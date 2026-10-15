@@ -61,7 +61,7 @@ def format_vector(v):
 class LuApp:
     def __init__(self, root):
         self.root = root
-        root.title("ЛР 1.1 — LU-разложение")
+        root.winfo_toplevel().title("ЛР 1.1 — LU-разложение")
 
         # Верхняя панель: размерность и кнопки
         top = tk.Frame(root)
