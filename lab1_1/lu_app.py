@@ -1,11 +1,3 @@
-"""Задание 1.1. Окно программы для LU-разложения.
-
-Запуск из корня проекта:  .venv/bin/python lab1_1/lu_app.py
-
-Здесь только интерфейс: ввод системы (вручную или из файла) и вывод
-результатов. Все вычисления — в lu.py.
-"""
-
 import tkinter as tk
 from tkinter import filedialog, messagebox, scrolledtext
 
@@ -14,17 +6,13 @@ import numpy as np
 from lu import LU, solve_lu, determinant, inverse
 
 
+# Строку в число (можно с запятой)
 def parse_number(text):
-    """Превращает строку в число; запятая допускается вместо точки."""
     return float(text.strip().replace(",", "."))
 
 
+# Чтение системы из файла
 def read_system_from_file(path):
-    """Читает систему из файла и возвращает (A, b).
-
-    Формат: n строк по n + 1 числу через пробел — строка матрицы A
-    и в конце элемент правой части b. Пустые строки пропускаются.
-    """
     rows = []
     with open(path, encoding="utf-8") as file:
         for line in file:
@@ -45,8 +33,9 @@ def read_system_from_file(path):
     return A, b
 
 
+# Вывод числа
 def format_number(value):
-    # "+ 0.0" превращает -0.0 в 0.0, чтобы не печатать "-0.0000"
+    # + 0.0 убирает -0.0
     return f"{round(value, 4) + 0.0:10.4f}"
 
 
@@ -63,7 +52,7 @@ class LuApp:
         self.root = root
         root.winfo_toplevel().title("ЛР 1.1 — LU-разложение")
 
-        # Верхняя панель: размерность и кнопки
+        # Кнопки сверху
         top = tk.Frame(root)
         top.pack(fill="x", padx=8, pady=6)
 
@@ -74,20 +63,20 @@ class LuApp:
         tk.Button(top, text="Загрузить из файла…", command=self.on_load).pack(side="left", padx=4)
         tk.Button(top, text="Решить", command=self.on_solve).pack(side="left", padx=4)
 
-        # Таблица полей ввода: матрица A и столбец b
+        # Таблица для ввода
         self.grid_frame = tk.Frame(root)
         self.grid_frame.pack(padx=8, pady=6)
-        self.a_entries = []  # a_entries[i][j] — поле ввода элемента A[i][j]
-        self.b_entries = []  # b_entries[i] — поле ввода элемента b[i]
+        self.a_entries = []
+        self.b_entries = []
 
-        # Поле вывода результатов (моноширинный шрифт, чтобы столбцы были ровными)
+        # Поле вывода
         self.output = scrolledtext.ScrolledText(root, width=90, height=30, font=("Courier", 10))
         self.output.pack(fill="both", expand=True, padx=8, pady=6)
 
         self.build_grid(3)
 
+    # Создание таблицы для ввода
     def build_grid(self, n):
-        """Пересоздаёт таблицу полей ввода под систему размера n."""
         for widget in self.grid_frame.winfo_children():
             widget.destroy()
         self.a_entries = []
@@ -104,14 +93,14 @@ class LuApp:
                 row_entries.append(entry)
             self.a_entries.append(row_entries)
 
-            # Столбец n — разделитель между A и b
+            # Разделитель
             tk.Label(self.grid_frame, text="|").grid(row=i + 1, column=n)
             entry = tk.Entry(self.grid_frame, width=8, justify="right")
             entry.grid(row=i + 1, column=n + 1, padx=1, pady=1)
             self.b_entries.append(entry)
 
+    # Заполнение таблицы числами
     def fill_grid(self, A, b):
-        """Записывает числа системы в поля ввода."""
         n = len(A)
         self.n_var.set(str(n))
         self.build_grid(n)
@@ -120,8 +109,8 @@ class LuApp:
                 self.a_entries[i][j].insert(0, f"{A[i][j]:g}")
             self.b_entries[i].insert(0, f"{b[i]:g}")
 
+    # Чтение чисел из таблицы
     def read_grid(self):
-        """Считывает систему из полей ввода и возвращает (A, b)."""
         A = np.array([[parse_number(entry.get()) for entry in row] for row in self.a_entries])
         b = np.array([parse_number(entry.get()) for entry in self.b_entries])
         return A, b
@@ -164,11 +153,11 @@ class LuApp:
         try:
             self.show_results(A, b)
         except ValueError as error:
-            # Сюда попадает ошибка из LU, если матрица вырождена
+            # Вырожденная матрица
             messagebox.showerror("Ошибка", str(error))
 
+    # Решение и вывод результатов
     def show_results(self, A, b):
-        """Выполняет все расчёты задания 1.1 и печатает их по порядку."""
         n = len(A)
 
         self.write("Исходная матрица A:")
@@ -185,7 +174,7 @@ class LuApp:
         self.write("\nL * U:")
         self.write(format_matrix(L @ U))
 
-        # Матрица перестановок: строки единичной матрицы в порядке perm
+        # Матрица перестановок
         P = np.eye(n)[perm]
         self.write(f"\nМатрица перестановок P (перестановок строк: {s}):")
         self.write(format_matrix(P))

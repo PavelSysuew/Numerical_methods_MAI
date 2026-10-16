@@ -1,11 +1,3 @@
-"""Задание 1.4. Окно программы для метода вращений Якоби.
-
-Запуск из корня проекта:  .venv/bin/python lab1_4/jacobi_app.py
-
-Здесь только интерфейс: ввод матрицы и точности (вручную или из файла)
-и вывод результатов. Все вычисления — в jacobi.py.
-"""
-
 import tkinter as tk
 from tkinter import filedialog, messagebox, scrolledtext
 
@@ -14,17 +6,13 @@ import numpy as np
 from jacobi import jacobi_rotations
 
 
+# Строку в число (можно с запятой)
 def parse_number(text):
-    """Превращает строку в число; запятая допускается вместо точки."""
     return float(text.strip().replace(",", "."))
 
 
+# Чтение точности и матрицы из файла
 def read_matrix_from_file(path):
-    """Читает из файла точность и матрицу, возвращает (eps, A).
-
-    Формат: первая строка — точность ε; затем n строк по n чисел — матрица A.
-    Пустые строки пропускаются.
-    """
     lines = []
     with open(path, encoding="utf-8") as file:
         for line in file:
@@ -43,8 +31,9 @@ def read_matrix_from_file(path):
     return eps, np.array(rows)
 
 
+# Вывод числа
 def format_number(value):
-    # "+ 0.0" превращает -0.0 в 0.0, чтобы не печатать "-0.0000"
+    # + 0.0 убирает -0.0
     return f"{round(value, 6) + 0.0:12.6f}"
 
 
@@ -61,7 +50,7 @@ class JacobiApp:
         self.root = root
         root.winfo_toplevel().title("ЛР 1.4 — Метод вращений Якоби")
 
-        # Верхняя панель: размерность, точность и кнопки
+        # Кнопки сверху
         top = tk.Frame(root)
         top.pack(fill="x", padx=8, pady=6)
 
@@ -77,19 +66,19 @@ class JacobiApp:
         tk.Button(top, text="Загрузить из файла…", command=self.on_load).pack(side="left", padx=4)
         tk.Button(top, text="Решить", command=self.on_solve).pack(side="left", padx=4)
 
-        # Таблица полей ввода матрицы
+        # Таблица для ввода
         self.grid_frame = tk.Frame(root)
         self.grid_frame.pack(padx=8, pady=6)
-        self.entries = []  # entries[i][j] — поле ввода элемента A[i][j]
+        self.entries = []
 
-        # Поле вывода результатов
+        # Поле вывода
         self.output = scrolledtext.ScrolledText(root, width=90, height=32, font=("Courier", 10))
         self.output.pack(fill="both", expand=True, padx=8, pady=6)
 
         self.build_grid(3)
 
+    # Создание таблицы для ввода
     def build_grid(self, n):
-        """Пересоздаёт таблицу полей ввода под матрицу размера n."""
         for widget in self.grid_frame.winfo_children():
             widget.destroy()
         self.entries = []
@@ -103,8 +92,8 @@ class JacobiApp:
                 row_entries.append(entry)
             self.entries.append(row_entries)
 
+    # Заполнение таблицы числами
     def fill_grid(self, A):
-        """Записывает элементы матрицы в поля ввода."""
         n = len(A)
         self.n_var.set(str(n))
         self.build_grid(n)
@@ -112,8 +101,8 @@ class JacobiApp:
             for j in range(n):
                 self.entries[i][j].insert(0, f"{A[i][j]:g}")
 
+    # Чтение чисел из таблицы
     def read_grid(self):
-        """Считывает матрицу из полей ввода."""
         return np.array([[parse_number(entry.get()) for entry in row] for row in self.entries])
 
     def write(self, text=""):
@@ -164,8 +153,8 @@ class JacobiApp:
         except ValueError as error:
             messagebox.showerror("Ошибка", str(error))
 
+    # Решение и вывод результатов
     def show_results(self, A, eps):
-        """Выполняет расчёты задания 1.4 и печатает их по порядку."""
         n = len(A)
         self.write(f"Заданная точность ε = {eps:g}")
         self.write("\nИсходная матрица A:")

@@ -1,15 +1,3 @@
-"""Задание 1.2. Окно программы для метода прогонки.
-
-Запуск из корня проекта:  .venv/bin/python lab1_2/tridiagonale_app.py
-
-Здесь только интерфейс: ввод системы (вручную или из файла) и вывод
-результатов. Все вычисления — в tridiagonale.py.
-
-Матрица вводится и записывается в файле целиком, как на листочке, но
-программа берёт из неё только три диагонали: в памяти хранятся массивы
-a, диагональ, c и d длины n, а полная матрица n x n не создаётся.
-"""
-
 import tkinter as tk
 from tkinter import filedialog, messagebox, scrolledtext
 
@@ -17,28 +5,22 @@ import numpy as np
 
 from tridiagonale import tridiagonale, has_diagonal_dominance, residual
 
-
+# Превращает строку в число; запятая допускается вместо точки.
 def parse_number(text):
-    """Превращает строку в число; запятая допускается вместо точки."""
+
     return float(text.strip().replace(",", "."))
 
 
+# Клетка на одной из трёх диагоналей?
 def is_tridiagonal_cell(i, j):
-    """Лежит ли элемент (i, j) на главной диагонали или на одной из соседних."""
     return abs(i - j) <= 1
 
 
+# Чтение системы из файла
 def read_system_from_file(path):
-    """Читает систему из файла и возвращает (a, diag, c, d).
-
-    Формат как на листочке: n строк по n + 1 числу — строка матрицы и в конце
-    элемент правой части d. Файл читается построчно, и из каждой строки
-    берутся только три элемента у диагонали и d; остальные элементы
-    проверяются на равенство нулю и не сохраняются.
-    """
     a, diag, c, d = [], [], [], []
     n = None
-    i = 0  # номер текущей строки матрицы
+    i = 0  # номер строки
 
     with open(path, encoding="utf-8") as file:
         for line in file:
@@ -47,7 +29,7 @@ def read_system_from_file(path):
             row = [parse_number(part) for part in line.split()]
 
             if n is None:
-                n = len(row) - 1  # размерность берём из длины первой строки
+                n = len(row) - 1  # размерность по первой строке
             if len(row) != n + 1:
                 raise ValueError(f"В строке {i + 1} должно быть {n + 1} чисел, а их {len(row)}.")
             if i >= n:
@@ -71,8 +53,9 @@ def read_system_from_file(path):
     return np.array(a), np.array(diag), np.array(c), np.array(d)
 
 
+# Вывод числа
 def format_number(value):
-    # "+ 0.0" превращает -0.0 в 0.0, чтобы не печатать "-0.0000"
+    # + 0.0 убирает -0.0
     return f"{round(value, 6) + 0.0:12.6f}"
 
 
@@ -85,7 +68,7 @@ class TridiagonalApp:
         self.root = root
         root.winfo_toplevel().title("ЛР 1.2 — Метод прогонки")
 
-        # Верхняя панель: размерность и кнопки
+        # Кнопки сверху
         top = tk.Frame(root)
         top.pack(fill="x", padx=8, pady=6)
 
@@ -96,24 +79,20 @@ class TridiagonalApp:
         tk.Button(top, text="Загрузить из файла…", command=self.on_load).pack(side="left", padx=4)
         tk.Button(top, text="Решить", command=self.on_solve).pack(side="left", padx=4)
 
-        # Таблица ввода: матрица и столбец d, как на листочке
+        # Таблица для ввода
         self.grid_frame = tk.Frame(root)
         self.grid_frame.pack(padx=8, pady=6)
-        self.matrix_entries = {}  # matrix_entries[(i, j)] — поле элемента (i, j), только на трёх диагоналях
-        self.d_entries = []       # d_entries[i] — поле элемента правой части d[i]
+        self.matrix_entries = {}
+        self.d_entries = []
 
-        # Поле вывода результатов
+        # Поле вывода
         self.output = scrolledtext.ScrolledText(root, width=80, height=26, font=("Courier", 10))
         self.output.pack(fill="both", expand=True, padx=8, pady=6)
 
         self.build_grid(3)
 
+    # Создание таблицы для ввода
     def build_grid(self, n):
-        """Пересоздаёт таблицу под систему размера n.
-
-        Поля ввода есть только на трёх диагоналях; в остальных клетках
-        стоит неизменяемый ноль, потому что матрица трёхдиагональная.
-        """
         for widget in self.grid_frame.winfo_children():
             widget.destroy()
         self.matrix_entries = {}
@@ -131,14 +110,14 @@ class TridiagonalApp:
                 else:
                     tk.Label(self.grid_frame, text="0", width=7, fg="gray").grid(row=i + 1, column=j)
 
-            # Столбец n — разделитель между матрицей и d
+            # Разделитель
             tk.Label(self.grid_frame, text="|").grid(row=i + 1, column=n)
             entry = tk.Entry(self.grid_frame, width=7, justify="right")
             entry.grid(row=i + 1, column=n + 1, padx=1, pady=1)
             self.d_entries.append(entry)
 
+    # Заполнение таблицы числами
     def fill_grid(self, a, diag, c, d):
-        """Записывает числа системы в поля ввода."""
         n = len(diag)
         self.n_var.set(str(n))
         self.build_grid(n)
@@ -150,8 +129,8 @@ class TridiagonalApp:
                 self.matrix_entries[(i, i + 1)].insert(0, f"{c[i]:g}")
             self.d_entries[i].insert(0, f"{d[i]:g}")
 
+    # Чтение чисел из таблицы
     def read_grid(self):
-        """Считывает из таблицы только три диагонали и d, возвращает (a, diag, c, d)."""
         n = len(self.d_entries)
         a, diag, c, d = np.zeros(n), np.zeros(n), np.zeros(n), np.zeros(n)
         for i in range(n):
@@ -203,8 +182,8 @@ class TridiagonalApp:
         except ValueError as error:
             messagebox.showerror("Ошибка", str(error))
 
+    # Решение и вывод результатов
     def show_results(self, a, diag, c, d):
-        """Выполняет прогонку и печатает коэффициенты, решение и массивы a, b, c, d."""
         n = len(diag)
 
         if has_diagonal_dominance(a, diag, c):
@@ -214,7 +193,7 @@ class TridiagonalApp:
 
         P, Q, x = tridiagonale(a, diag, c, d)
 
-        # Нумерация как в лекции: P₁..Pₙ₊₁, Q₁..Qₙ₊₁
+        # Нумерация с 1, как в лекции
         self.write("\nПрогоночные коэффициенты:")
         self.write(f"{'i':>3}{'P_i':>14}{'Q_i':>14}")
         for k in range(n + 1):
@@ -227,7 +206,7 @@ class TridiagonalApp:
         r = residual(a, diag, c, d, x)
         self.write(f"\nПроверка: максимальная невязка |A·x − d| = {np.max(np.abs(r)):.3e}")
 
-        # Массивы в каноническом виде лекции: a_i x_{i-1} − b_i x_i + c_i x_{i+1} = d_i
+        # Массивы a, b, c, d
         self.write("\nМассивы, которые хранит программа (вид a·xᵢ₋₁ − b·xᵢ + c·xᵢ₊₁ = d):")
         self.write(f"  a = {format_array(a)}")
         self.write(f"  b = {format_array(-diag)}   (диагональ со знаком минус)")

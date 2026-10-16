@@ -62,7 +62,8 @@ class MainApp:
 
         # Окна заданий создаются при первом открытии и потом только
         # скрываются и показываются — введённые данные не теряются
-        self.frames = {}
+        self.frames = {}  # frames[i] — рамка, в которой построено окно задания i
+        self.apps = {}    # apps[i] — объект окна задания i (LuApp, QrApp, ...)
         self.current = None
 
         self.show_lab(0)
@@ -76,7 +77,7 @@ class MainApp:
         if index not in self.frames:
             frame = tk.Frame(self.content)
             app_class = LABS[index][2]
-            app_class(frame)  # окно задания строится внутри frame
+            self.apps[index] = app_class(frame)  # окно задания строится внутри frame
             self.frames[index] = frame
 
         self.frames[index].pack(fill="both", expand=True)

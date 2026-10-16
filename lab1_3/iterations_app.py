@@ -1,11 +1,3 @@
-"""Задание 1.3. Окно программы для метода простых итераций и метода Зейделя.
-
-Запуск из корня проекта:  .venv/bin/python lab1_3/iterations_app.py
-
-Здесь только интерфейс: ввод системы и точности (вручную или из файла)
-и вывод результатов. Все вычисления — в iterations.py.
-"""
-
 import tkinter as tk
 from tkinter import filedialog, messagebox, scrolledtext
 
@@ -13,21 +5,17 @@ import numpy as np
 
 from iterations import matrix_norm, vector_norm, to_iteration_form, simple_iteration, seidel
 
-# Точности для анализа: как растёт число итераций при уменьшении ε
+# Точности для анализа числа итераций
 ANALYSIS_EPS = [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-8, 1e-10]
 
 
+# Строку в число (можно с запятой)
 def parse_number(text):
-    """Превращает строку в число; запятая допускается вместо точки."""
     return float(text.strip().replace(",", "."))
 
 
+# Чтение системы из файла
 def read_system_from_file(path):
-    """Читает из файла точность и систему, возвращает (eps, A, b).
-
-    Формат: первая строка — точность ε; затем n строк по n + 1 числу —
-    строка матрицы A и в конце элемент правой части b. Пустые строки пропускаются.
-    """
     lines = []
     with open(path, encoding="utf-8") as file:
         for line in file:
@@ -51,8 +39,9 @@ def read_system_from_file(path):
     return eps, data[:, :n], data[:, n]
 
 
+# Вывод числа
 def format_number(value):
-    # "+ 0.0" превращает -0.0 в 0.0, чтобы не печатать "-0.0000"
+    # + 0.0 убирает -0.0
     return f"{round(value, 6) + 0.0:12.6f}"
 
 
@@ -69,7 +58,7 @@ class IterationsApp:
         self.root = root
         root.winfo_toplevel().title("ЛР 1.3 — Метод простых итераций и метод Зейделя")
 
-        # Верхняя панель: размерность, точность и кнопки
+        # Кнопки сверху
         top = tk.Frame(root)
         top.pack(fill="x", padx=8, pady=6)
 
@@ -85,20 +74,20 @@ class IterationsApp:
         tk.Button(top, text="Загрузить из файла…", command=self.on_load).pack(side="left", padx=4)
         tk.Button(top, text="Решить", command=self.on_solve).pack(side="left", padx=4)
 
-        # Таблица полей ввода: матрица A и столбец b
+        # Таблица для ввода
         self.grid_frame = tk.Frame(root)
         self.grid_frame.pack(padx=8, pady=6)
-        self.a_entries = []  # a_entries[i][j] — поле ввода элемента A[i][j]
-        self.b_entries = []  # b_entries[i] — поле ввода элемента b[i]
+        self.a_entries = []
+        self.b_entries = []
 
-        # Поле вывода результатов
+        # Поле вывода
         self.output = scrolledtext.ScrolledText(root, width=100, height=32, font=("Courier", 10))
         self.output.pack(fill="both", expand=True, padx=8, pady=6)
 
         self.build_grid(3)
 
+    # Создание таблицы для ввода
     def build_grid(self, n):
-        """Пересоздаёт таблицу полей ввода под систему размера n."""
         for widget in self.grid_frame.winfo_children():
             widget.destroy()
         self.a_entries = []
@@ -115,14 +104,14 @@ class IterationsApp:
                 row_entries.append(entry)
             self.a_entries.append(row_entries)
 
-            # Столбец n — разделитель между A и b
+            # Разделитель
             tk.Label(self.grid_frame, text="|").grid(row=i + 1, column=n)
             entry = tk.Entry(self.grid_frame, width=8, justify="right")
             entry.grid(row=i + 1, column=n + 1, padx=1, pady=1)
             self.b_entries.append(entry)
 
+    # Заполнение таблицы числами
     def fill_grid(self, A, b):
-        """Записывает числа системы в поля ввода."""
         n = len(A)
         self.n_var.set(str(n))
         self.build_grid(n)
@@ -131,8 +120,8 @@ class IterationsApp:
                 self.a_entries[i][j].insert(0, f"{A[i][j]:g}")
             self.b_entries[i].insert(0, f"{b[i]:g}")
 
+    # Чтение чисел из таблицы
     def read_grid(self):
-        """Считывает систему из полей ввода и возвращает (A, b)."""
         A = np.array([[parse_number(entry.get()) for entry in row] for row in self.a_entries])
         b = np.array([parse_number(entry.get()) for entry in self.b_entries])
         return A, b
@@ -185,15 +174,15 @@ class IterationsApp:
         except ValueError as error:
             messagebox.showerror("Ошибка", str(error))
 
+    # Вывод таблицы итераций
     def write_iterations(self, title, history):
-        """Печатает таблицу итераций: номер, приближение и оценку погрешности."""
         self.write(f"\n{title}:")
         self.write(f"{'k':>5}{'x⁽ᵏ⁾':>{12 * len(history[0][0])}}{'оценка погрешности':>22}")
         for k, (x, error) in enumerate(history, start=1):
             self.write(f"{k:>5}{format_vector(x)}{error:>22.3e}")
 
+    # Решение и вывод результатов
     def show_results(self, A, b, eps):
-        """Выполняет расчёты задания 1.3 и печатает их по порядку."""
         self.write(f"Заданная точность ε = {eps:g}")
 
         alpha, beta = to_iteration_form(A, b)
@@ -218,7 +207,7 @@ class IterationsApp:
         self.write_iterations("Метод простых итераций", history_simple)
         self.write_iterations("Метод Зейделя", history_seidel)
 
-        # Эталон — точное решение прямым методом (NumPy разрешён для проверки)
+        # Эталонное решение через numpy
         x_exact = np.linalg.solve(A, b)
         self.write("\nРезультаты:")
         self.write(f"{'':<26}{'x':<{12 * len(b)}}{'итераций':>10}{'‖x − x*‖':>14}")
