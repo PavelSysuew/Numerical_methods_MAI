@@ -3,8 +3,8 @@ import math
 import numpy as np
 
 
+# Критерий остановки: t(A) = sqrt(сумма a_ij^2 над диагональю)
 def off_diagonal_norm(A):
-    """Критерий остановки t(A) = sqrt(Σ_{i<j} a_ij²) — «размер» внедиагональной части."""
     n = A.shape[0]
     total = 0.0
     for i in range(n):
@@ -13,8 +13,8 @@ def off_diagonal_norm(A):
     return math.sqrt(total)
 
 
+# Поиск максимального по модулю элемента над диагональю
 def max_off_diagonal(A):
-    """Возвращает (i, j) максимального по модулю элемента выше главной диагонали."""
     n = A.shape[0]
     best_i, best_j = 0, 1
     for i in range(n):
@@ -24,13 +24,9 @@ def max_off_diagonal(A):
     return best_i, best_j
 
 
+# Матрица вращения U, которая обнуляет a_ij
 def rotation_matrix(A, i, j):
-    """Матрица вращения U, обнуляющая элемент a_ij в Uᵀ A U.
-
-    Угол: φ = ½·arctg(2a_ij / (a_ii − a_jj)); при a_ii = a_jj φ = π/4.
-    U — единичная матрица, у которой
-      u_ii = u_jj = cos φ,  u_ij = −sin φ,  u_ji = sin φ.
-    """
+    # phi = 1/2 * arctg(2a_ij / (a_ii - a_jj)), при a_ii = a_jj phi = pi/4
     if abs(A[i, i] - A[j, j]) <= 1e-12:
         phi = math.pi / 4
     else:
@@ -45,15 +41,8 @@ def rotation_matrix(A, i, j):
     return U
 
 
+# Метод вращений: собственные значения и векторы симметрической матрицы
 def jacobi_rotations(A, eps, max_iter=10000):
-    """Находит собственные значения и векторы симметрической матрицы A.
-
-    Итерации продолжаются, пока t(A⁽ᵏ⁾) > ε.
-    Возвращает (eigenvalues, V, history):
-      eigenvalues — диагональ последней A⁽ᵏ⁾;
-      V           — матрица собственных векторов (вектор λ_i — столбец V[:, i]);
-      history     — список t(A⁽ᵏ⁾) после каждой итерации, число итераций — len(history).
-    """
     A = np.array(A, dtype=float)
     if A.ndim != 2 or A.shape[0] != A.shape[1]:
         raise ValueError(f"Матрица должна быть квадратной, а её размер {A.shape}.")
@@ -61,17 +50,18 @@ def jacobi_rotations(A, eps, max_iter=10000):
         raise ValueError("Метод вращений применим только к симметрической матрице: должно быть a_ij = a_ji.")
 
     n = A.shape[0]
-    V = np.eye(n)
-    history = []
+    V = np.eye(n)  # сюда собираем произведение матриц вращения
+    history = []   # t(A) после каждой итерации
 
     while n > 1 and off_diagonal_norm(A) > eps:
         if len(history) >= max_iter:
             raise ValueError(f"Метод вращений не сошёлся за {max_iter} итераций.")
         i, j = max_off_diagonal(A)
         U = rotation_matrix(A, i, j)
-        A = U.T @ A @ U  # поворот: a_ij и a_ji становятся нулями
-        V = V @ U        # накапливаем произведение матриц вращения
+        A = U.T @ A @ U  # после поворота a_ij = a_ji = 0
+        V = V @ U
         history.append(off_diagonal_norm(A))
 
+    # Собственные значения — диагональ, собственные векторы — столбцы V
     eigenvalues = np.array([A[k, k] for k in range(n)])
     return eigenvalues, V, history

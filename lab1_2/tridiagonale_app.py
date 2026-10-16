@@ -193,7 +193,7 @@ class TridiagonalApp:
 
         P, Q, x = tridiagonale(a, diag, c, d)
 
-        # Нумерация с 1, как в лекции
+        # Нумерация с 1
         self.write("\nПрогоночные коэффициенты:")
         self.write(f"{'i':>3}{'P_i':>14}{'Q_i':>14}")
         for k in range(n + 1):

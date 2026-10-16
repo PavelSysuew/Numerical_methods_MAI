@@ -1,17 +1,8 @@
-"""Лабораторная работа № 1 по численным методам — общее окно для всех заданий.
-
-Запуск из корня проекта:  .venv/bin/python main.py
-
-Слева меню с заданиями, справа — окно выбранного задания. Каждое задание
-по-прежнему можно запустить и отдельно, например .venv/bin/python lab1_1/lu_app.py.
-"""
-
 import os
 import sys
 import tkinter as tk
 
-# Папки заданий добавляем в пути поиска модулей, чтобы работали их импорты
-# вида "from lu import ...": каждое задание лежит в своей папке.
+# Добавляем папки заданий, чтобы работали импорты вида "from lu import ..."
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 for folder in ("lab1_1", "lab1_2", "lab1_3", "lab1_4", "lab1_5"):
     sys.path.insert(0, os.path.join(PROJECT_DIR, folder))
@@ -22,7 +13,7 @@ from iterations_app import IterationsApp
 from jacobi_app import JacobiApp
 from qr_app import QrApp
 
-# (номер, название, класс окна задания)
+# Номер, название и окно задания
 LABS = [
     ("1.1", "LU-разложение", LuApp),
     ("1.2", "Метод прогонки", TridiagonalApp),
@@ -32,16 +23,17 @@ LABS = [
 ]
 
 
+# Главное окно: слева меню, справа выбранное задание
 class MainApp:
     def __init__(self, root):
         self.root = root
         root.title("Численные методы — ЛР № 1")
         root.geometry("1250x820")
 
-        # Левое меню
+        # Меню слева
         menu = tk.Frame(root, width=230, bg="#e8e8e8")
         menu.pack(side="left", fill="y")
-        menu.pack_propagate(False)  # ширина меню не зависит от длины надписей
+        menu.pack_propagate(False)  # фиксированная ширина
 
         tk.Label(menu, text="Лабораторная работа № 1", bg="#e8e8e8",
                  font=("TkDefaultFont", 11, "bold")).pack(pady=(12, 8))
@@ -51,41 +43,37 @@ class MainApp:
             button = tk.Button(
                 menu, text=f"{number}  {name}", anchor="w", justify="left",
                 relief="flat", padx=10, pady=6,
-                command=lambda i=index: self.show_lab(i),
+                command=lambda i=index: self.show_lab(i),  # i=index, чтобы кнопка запомнила свой номер
             )
             button.pack(fill="x", padx=8, pady=2)
             self.buttons.append(button)
 
-        # Правая часть: сюда помещается окно выбранного задания
+        # Справа — окно задания
         self.content = tk.Frame(root)
         self.content.pack(side="left", fill="both", expand=True)
 
-        # Окна заданий создаются при первом открытии и потом только
-        # скрываются и показываются — введённые данные не теряются
-        self.frames = {}  # frames[i] — рамка, в которой построено окно задания i
-        self.apps = {}    # apps[i] — объект окна задания i (LuApp, QrApp, ...)
+        self.frames = {}  # рамки заданий, создаются один раз
+        self.apps = {}    # объекты окон заданий
         self.current = None
 
         self.show_lab(0)
 
+    # Переключение на задание index
     def show_lab(self, index):
-        """Показывает задание с номером index из списка LABS."""
         if self.current is not None:
-            self.frames[self.current].pack_forget()
+            self.frames[self.current].pack_forget()  # прячем, а не удаляем — данные сохраняются
             self.buttons[self.current].config(relief="flat", bg=self.root.cget("bg"))
 
         if index not in self.frames:
             frame = tk.Frame(self.content)
             app_class = LABS[index][2]
-            self.apps[index] = app_class(frame)  # окно задания строится внутри frame
+            self.apps[index] = app_class(frame)
             self.frames[index] = frame
 
         self.frames[index].pack(fill="both", expand=True)
         self.buttons[index].config(relief="sunken", bg="#c8d8f0")
         self.current = index
 
-        # Каждое окно задания при создании ставит свой заголовок; при
-        # повторном открытии ставим его здесь
         number, name, _ = LABS[index]
         self.root.title(f"Численные методы — ЛР {number}. {name.replace(chr(10), ' ')}")
 

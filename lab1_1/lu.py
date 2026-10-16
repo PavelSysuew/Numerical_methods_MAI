@@ -15,7 +15,7 @@ def LU(A: np.ndarray):
     s = 0 # Число перестановок строк
 
     for k in range(n): # k-ый шаг разложения. Бежим по столбцам с номером k
-        # Находим индекс максимального элемента в столбце i
+        # Находим индекс максимального по модулю элемента в столбце k
         max_index = np.argmax(np.abs(U[k:n, k])) + k
 
         # Если максимальный элемент не на диагонали, меняем строки местами
@@ -38,6 +38,8 @@ def LU(A: np.ndarray):
 
     return L, U, perm, s
 
+
+# Решение Ax = b по готовому разложению PA = LU
 def solve_lu(L: np.ndarray, U: np.ndarray, perm: np.ndarray, b: np.ndarray):
     n = L.shape[0]
     # Применяем перестановки к вектору b
@@ -56,6 +58,7 @@ def solve_lu(L: np.ndarray, U: np.ndarray, perm: np.ndarray, b: np.ndarray):
     return x
 
 
+# Определитель: произведение диагонали U со знаком (-1)^s
 def determinant(U: np.ndarray, s: int):
     det = 1
     for i in range(U.shape[0]):
@@ -66,6 +69,8 @@ def determinant(U: np.ndarray, s: int):
         det = -det  
     return det
 
+
+# Обратная матрица: i-й столбец — решение системы Ax = e_i
 def inverse(L: np.ndarray, U: np.ndarray, perm: np.ndarray):
     n = L.shape[0]
     inv_A = np.zeros((n, n))

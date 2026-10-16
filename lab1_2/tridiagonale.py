@@ -13,7 +13,7 @@ def tridiagonale(a, diag, c, d):
     if a[0] != 0 or c[n - 1] != 0:
         raise ValueError("В первом уравнении нет x₀, в последнем нет xₙ₊₁: a₁ и cₙ должны быть равны 0.")
 
-    b = -diag
+    b = -diag  # уравнение a_i x_(i-1) - b_i x_i + c_i x_(i+1) = d_i, на диагонали -b_i
 
     # P[0] = Q[0] = 0 — стартовые значения 
     P = np.zeros(n + 1)
@@ -27,6 +27,7 @@ def tridiagonale(a, diag, c, d):
         P[i + 1] = c[i] / denominator
         Q[i + 1] = (a[i] * Q[i] - d[i]) / denominator
 
+    # Обратный ход: x_n = Q_{n+1}, x_i = P_{i+1} x_{i+1} + Q_{i+1}
     x = np.zeros(n)
     x[n - 1] = Q[n]
     for i in range(n - 2, -1, -1):
@@ -41,7 +42,7 @@ def has_diagonal_dominance(a, diag, c):
     return bool(np.all(diag >= a + c) and np.any(diag > a + c))
 
 
-# Невязка
+# Невязка r = Ax - d, считается только по трём диагоналям
 def residual(a, diag, c, d, x):
     n = len(x)
     r = np.zeros(n)
