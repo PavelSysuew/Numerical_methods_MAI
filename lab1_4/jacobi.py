@@ -3,7 +3,7 @@ import math
 import numpy as np
 
 
-# Критерий остановки: t(A) = sqrt(сумма a_ij^2 над диагональю)
+# Критерий остановки
 def off_diagonal_norm(A):
     n = A.shape[0]
     total = 0.0
@@ -26,7 +26,6 @@ def max_off_diagonal(A):
 
 # Матрица вращения U, которая обнуляет a_ij
 def rotation_matrix(A, i, j):
-    # phi = 1/2 * arctg(2a_ij / (a_ii - a_jj)), при a_ii = a_jj phi = pi/4
     if abs(A[i, i] - A[j, j]) <= 1e-12:
         phi = math.pi / 4
     else:
@@ -58,7 +57,7 @@ def jacobi_rotations(A, eps, max_iter=10000):
             raise ValueError(f"Метод вращений не сошёлся за {max_iter} итераций.")
         i, j = max_off_diagonal(A)
         U = rotation_matrix(A, i, j)
-        A = U.T @ A @ U  # после поворота a_ij = a_ji = 0
+        A = U.T @ A @ U  # после поворота
         V = V @ U
         history.append(off_diagonal_norm(A))
 

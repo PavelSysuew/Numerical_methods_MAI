@@ -2,24 +2,17 @@ import os
 import sys
 import tkinter as tk
 
-# Добавляем папки заданий, чтобы работали импорты вида "from lu import ..."
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
-for folder in ("lab1_1", "lab1_2", "lab1_3", "lab1_4", "lab1_5"):
+for folder in ("lab2_1", "lab2_2"):
     sys.path.insert(0, os.path.join(PROJECT_DIR, folder))
 
-from lu_app import LuApp
-from tridiagonale_app import TridiagonalApp
-from iterations_app import IterationsApp
-from jacobi_app import JacobiApp
-from qr_app import QrApp
+from roots_app import RootsApp
+from system_app import SystemApp
 
 # Номер, название и окно задания
 LABS = [
-    ("1.1", "LU-разложение", LuApp),
-    ("1.2", "Метод прогонки", TridiagonalApp),
-    ("1.3", "Метод простых итераций\nи метод Зейделя", IterationsApp),
-    ("1.4", "Метод вращений Якоби", JacobiApp),
-    ("1.5", "QR-разложение\nи QR-алгоритм", QrApp),
+    ("2.1", "Метод простой итерации\nи метод Ньютона", RootsApp),
+    ("2.2", "Системы нелинейных\nуравнений", SystemApp),
 ]
 
 
@@ -27,7 +20,7 @@ LABS = [
 class MainApp:
     def __init__(self, root):
         self.root = root
-        root.title("Численные методы — ЛР № 1")
+        root.title("Численные методы — ЛР № 2")
         root.geometry("1250x820")
 
         # Меню слева
@@ -35,7 +28,7 @@ class MainApp:
         menu.pack(side="left", fill="y")
         menu.pack_propagate(False)  # фиксированная ширина
 
-        tk.Label(menu, text="Лабораторная работа № 1", bg="#e8e8e8",
+        tk.Label(menu, text="Лабораторная работа № 2", bg="#e8e8e8",
                  font=("TkDefaultFont", 11, "bold")).pack(pady=(12, 8))
 
         self.buttons = []
