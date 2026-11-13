@@ -7,18 +7,18 @@ from matplotlib.figure import Figure
 
 from least_squares import least_squares, polynomial, squared_error_sum, mean_squared_error
 
-# Степени приближающих многочленов по требованиям: 1-я, 2-я, 3-я
+# Степени многочленов
 DEGREES = (1, 2, 3)
 COLORS = {1: "tab:blue", 2: "tab:orange", 3: "tab:green"}
 SUBSCRIPTS = "₀₁₂₃₄₅₆₇₈₉"
 
 
-# Строку «-0.7 -0.4 -0.1» в список чисел (можно с запятой вместо точки)
+# Строку в список чисел
 def parse_numbers(text):
     return [float(part.replace(",", ".")) for part in text.split()]
 
 
-# Чтение из файла: строка 1 — xᵢ, строка 2 — yᵢ
+# Чтение данных из файла
 def read_input_from_file(path):
     with open(path, encoding="utf-8") as file:
         lines = [line for line in file if line.strip()]
@@ -27,7 +27,7 @@ def read_input_from_file(path):
     return parse_numbers(lines[0]), parse_numbers(lines[1])
 
 
-# Многочлен в строку: 0.005526 + 2.106704·x − ...
+# Многочлен в строку
 def polynomial_to_string(coefficients):
     text = f"{coefficients[0]:.6f}"
     for j, a in enumerate(coefficients[1:], start=1):
@@ -131,7 +131,7 @@ class LeastSquaresApp:
         for x, y in zip(X, Y):
             self.write(f"{x:>8g}{y:>12.6f}" + "".join(f"{polynomial(results[d], x):>12.6f}" for d in DEGREES))
 
-        # Сравнение ошибок: чем меньше MSE, тем лучше многочлен приближает данные
+        # Сравнение ошибок
         self.write("\nСравнение ошибок:")
         for degree in DEGREES:
             self.write(f"  MSE{degree} = {errors[degree]:.6e}")

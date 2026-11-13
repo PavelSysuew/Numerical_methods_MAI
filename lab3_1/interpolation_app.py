@@ -9,12 +9,12 @@ import func_3_1
 from interpolation import omega_derivative, lagrange, divided_differences, newton
 
 
-# Строку «-0.4 -0.1 0.2» в список чисел (можно с запятой вместо точки)
+# Строку в список чисел
 def parse_numbers(text):
     return [float(part.replace(",", ".")) for part in text.split()]
 
 
-# Чтение из файла: строка 1 — узлы набора а), строка 2 — узлы набора б), строка 3 — X*
+# Чтение данных из файла
 def read_input_from_file(path):
     with open(path, encoding="utf-8") as file:
         lines = [line for line in file if line.strip()]
@@ -26,14 +26,14 @@ def read_input_from_file(path):
     return parse_numbers(lines[0]), parse_numbers(lines[1]), x_star[0]
 
 
-# Множитель (x − a) в строку: (x − 0.2), (x + 0.4), x
+# Множитель для вывода многочлена
 def factor(a):
     if a == 0:
         return "x"
     return f"(x {'−' if a > 0 else '+'} {abs(a):g})"
 
 
-# Число со знаком для записи суммы: « + 1.23», « − 1.23»
+# Число со знаком для вывода
 def signed(value, first=False):
     if first:
         return f"{value:.6f}"
@@ -45,7 +45,7 @@ class InterpolationApp:
         self.root = root
         root.winfo_toplevel().title("ЛР 3.1 — Интерполяционные многочлены Лагранжа и Ньютона")
 
-        # Условие задачи — видно всегда
+        # Условие задачи
         tk.Label(root, text=f"Вариант 19.  {func_3_1.DESCRIPTION}.  Многочлены Лагранжа и Ньютона, "
                             "погрешность интерполяции в точке X*.",
                  font=("TkDefaultFont", 13, "bold"), anchor="w").pack(fill="x", padx=8, pady=(8, 0))
@@ -127,7 +127,7 @@ class InterpolationApp:
         for i in range(len(X)):
             self.write(f"{i:>3}{X[i]:>10g}{Y[i]:>16.10f}")
 
-        # Лагранж: таблица как в ручном расчёте
+        # Многочлен Лагранжа
         self.write("\nМногочлен Лагранжа  L(x) = Σ fᵢ / ω'(xᵢ) · ω(x) / (x − xᵢ)")
         self.write(f"{'i':>3}{'xᵢ':>10}{'fᵢ':>14}{'ω′(xᵢ)':>14}{'fᵢ/ω′(xᵢ)':>14}{'X* − xᵢ':>12}")
         coefficients = []
@@ -143,7 +143,7 @@ class InterpolationApp:
         self.write("L(x) = " + "\n       ".join(terms))
         value_lagrange = lagrange(X, Y, x_star)
 
-        # Ньютон: таблица разделённых разностей
+        # Многочлен Ньютона
         table = divided_differences(X, Y)
         self.write("\nМногочлен Ньютона, разделённые разности:")
         self.write(f"{'i':>3}{'xᵢ':>10}" + "".join(f"{f'порядок {k}':>14}" for k in range(len(X))))
@@ -158,7 +158,7 @@ class InterpolationApp:
         self.write("P(x) = " + "\n       ".join(terms))
         value_newton = newton(X, table, x_star)
 
-        # Погрешность: сравнение с точным значением функции
+        # Погрешность
         exact = func_3_1.f(x_star)
         self.write(f"\nЗначения в точке X* = {x_star:g}:")
         self.write(f"  L(X*)      = {value_lagrange:.10f}")
@@ -171,7 +171,7 @@ class InterpolationApp:
                    "(Лагранж и Ньютон — один и тот же многочлен)\n")
         return name, X, Y, table
 
-    # Для каждого набора общий график: функция, Лагранж, Ньютон, узлы, точка X*
+    # Графики для обоих наборов
     def draw_graphs(self, results, x_star):
         all_nodes = np.concatenate([X for _, X, _, _ in results])
         x = np.linspace(max(-1, all_nodes.min() - 0.1), min(1, all_nodes.max() + 0.1), 400)
@@ -180,7 +180,7 @@ class InterpolationApp:
             ax.clear()
             ax.plot(x, func_3_1.f(x), color="black", linewidth=3, alpha=0.4, label=f"f(x): {func_3_1.DESCRIPTION}")
             ax.plot(x, lagrange(X, Y, x), color="tab:blue", label="многочлен Лагранжа L(x)")
-            # Ньютон совпадает с Лагранжем, поэтому рисуем его пунктиром поверх
+            # Ньютон совпадает с Лагранжем, рисуем пунктиром
             ax.plot(x, newton(X, table, x), "--", color="tab:orange", label="многочлен Ньютона P(x)")
             ax.plot(X, Y, "ko", label="узлы интерполяции")
             ax.plot(x_star, lagrange(X, Y, x_star), "r*", markersize=14, label=f"точка X* = {x_star:g}")

@@ -5,7 +5,7 @@ import func_3_5
 from integration import (grid, left_rectangles, right_rectangles, middle_rectangles,
                          trapezoids, simpson, runge_romberg)
 
-# Метод, функция и порядок точности p (нужен методу Рунге–Ромберга)
+# Методы и их порядок точности p
 METHODS = [
     ("Левые прямоуг.", left_rectangles, 1),
     ("Правые прямоуг.", right_rectangles, 1),
@@ -16,12 +16,12 @@ METHODS = [
 FIELDS = ("X₀", "Xₖ", "h₁", "h₂")
 
 
-# Строку в число (можно с запятой)
+# Строку в число
 def parse_number(text):
     return float(text.strip().replace(",", "."))
 
 
-# Чтение из файла: X₀, Xₖ, h₁, h₂ (переносы строк не важны)
+# Чтение данных из файла
 def read_input_from_file(path):
     numbers = []
     with open(path, encoding="utf-8") as file:
@@ -51,7 +51,7 @@ class IntegrationApp:
         tk.Button(top, text="Загрузить из файла…", command=self.on_load).pack(side="left", padx=(12, 4))
         tk.Button(top, text="Решить", command=self.on_solve).pack(side="left", padx=4)
 
-        # График для этой части не требуется — только текстовый вывод
+        # Поле для вывода
         self.output = scrolledtext.ScrolledText(root, font=("Courier", 10))
         self.output.pack(fill="both", expand=True, padx=8, pady=6)
 
@@ -113,7 +113,7 @@ class IntegrationApp:
             results[name] = (F_h1, F_h2, refined)
             self.write(f"{name:<18}{F_h1:>15.10f}{F_h2:>15.10f}{p:>4}{refined:>16.10f}{estimate:>17.3e}")
 
-        # Интеграл берётся аналитически — сравниваем с точным значением
+        # Сравнение с точным значением
         exact = func_3_5.exact_integral(a, b)
         self.write(f"\nТочное значение (по первообразной): F = {exact:.10f}")
         self.write("Абсолютная погрешность |F_численное − F|:")

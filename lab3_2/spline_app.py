@@ -8,12 +8,12 @@ from matplotlib.figure import Figure
 from spline import cubic_spline, spline_value, spline_second_derivative
 
 
-# Строку «-0.4 -0.1 0.2» в список чисел (можно с запятой вместо точки)
+# Строку в список чисел
 def parse_numbers(text):
     return [float(part.replace(",", ".")) for part in text.split()]
 
 
-# Чтение из файла: строка 1 — xᵢ, строка 2 — fᵢ, строка 3 — X*
+# Чтение данных из файла
 def read_input_from_file(path):
     with open(path, encoding="utf-8") as file:
         lines = [line for line in file if line.strip()]
@@ -122,21 +122,21 @@ class SplineApp:
         self.write(f"\nX* = {x_star:g} лежит в интервале № {j}: [{X[j]:g}, {X[j + 1]:g}]")
         self.write(f"S(X*) = {spline_value(X, coefficients, x_star):.10f}")
 
-        # Проверка: сплайн проходит через узлы
+        # Проверка узлов
         self.write("\nПроверка прохождения через узлы:")
         self.write(f"{'i':>3}{'xᵢ':>10}{'fᵢ':>14}{'S(xᵢ)':>16}{'|S(xᵢ) − fᵢ|':>16}")
         for i in range(n + 1):
             s = spline_value(X, coefficients, X[i])
             self.write(f"{i:>3}{X[i]:>10g}{Y[i]:>14.6f}{s:>16.10f}{abs(s - Y[i]):>16.2e}")
 
-        # Проверка граничных условий: нулевая кривизна на концах
+        # Проверка на концах
         self.write("\nПроверка граничных условий (должно быть 0):")
         self.write(f"  S''(x₀) = S''({X[0]:g}) = {spline_second_derivative(X, coefficients, X[0]):.3e}")
         self.write(f"  S''(xₙ) = S''({X[-1]:g}) = {spline_second_derivative(X, coefficients, X[-1]):.3e}")
 
         self.draw_graphs(X, Y, coefficients, x_star)
 
-    # Каждый участок сплайна своим цветом, узлы и точка (X*, S(X*))
+    # График сплайна
     def draw_graphs(self, X, Y, coefficients, x_star):
         self.ax.clear()
         for j in range(len(X) - 1):

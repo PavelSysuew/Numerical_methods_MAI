@@ -8,12 +8,12 @@ from matplotlib.figure import Figure
 from derivative import derivatives_at, parabola, slope
 
 
-# Строку «-1 0 1 2 3» в список чисел (можно с запятой вместо точки)
+# Строку в список чисел
 def parse_numbers(text):
     return [float(part.replace(",", ".")) for part in text.split()]
 
 
-# Чтение из файла: строка 1 — xᵢ, строка 2 — yᵢ, строка 3 — X*
+# Чтение данных из файла
 def read_input_from_file(path):
     with open(path, encoding="utf-8") as file:
         lines = [line for line in file if line.strip()]
@@ -105,7 +105,7 @@ class DerivativeApp:
 
         self.write(f"\nТочка вычисления: X* = {x_star:g}")
 
-        # Номер узла, совпадающего с X* (для подписи использованных узлов)
+        # Номер узла, который совпадает с X*
         node = next((k for k in range(len(X)) if abs(X[k] - x_star) < 1e-12), None)
 
         def nodes_text(*indices):
@@ -127,7 +127,7 @@ class DerivativeApp:
 
         self.draw_graph(X, Y, x_star, result)
 
-    # Точки таблицы, парабола и касательные к ней в X*
+    # График
     def draw_graph(self, X, Y, x_star, result):
         i = result["start"]
         x = np.linspace(X[0], X[-1], 400)
